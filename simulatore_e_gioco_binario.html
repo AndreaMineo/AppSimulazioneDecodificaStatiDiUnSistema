@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulatore & Gioco: Perché il Sistema Binario?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+        .glow-bulb {
+            transition: all 0.15s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20">
+                    <i class="fa-solid fa-lightbulb text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white leading-tight">Laboratorio di Informatica • 2B AFM</h1>
+                    <p class="text-xs text-slate-400">Perché i computer usano il Sistema Binario?</p>
+                </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700/60 text-sm">
+                <button id="tab-sim" onclick="switchTab('sim')" class="px-4 py-2 rounded-lg font-medium transition-all bg-sky-600 text-white shadow-sm">
+                    <i class="fa-solid fa-sliders mr-2"></i>Simulatore
+                </button>
+                <button id="tab-game" onclick="switchTab('game')" class="px-4 py-2 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-gamepad mr-2"></i>Gioco "Decodifica"
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
+
+        <!-- SECTION 1: SIMULATORE -->
+        <div id="panel-sim" class="space-y-6">
+            <!-- INTRO BANNER -->
+            <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-6 relative overflow-hidden">
+                <div class="max-w-3xl">
+                    <span class="text-xs uppercase tracking-wider font-semibold text-sky-400 bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/20">Esperimento Didattico</span>
+                    <h2 class="text-2xl font-bold text-white mt-3">Il Problema dell'Interferenza nei Segnali</h2>
+                    <p class="text-slate-300 text-sm mt-2 leading-relaxed">
+                        Nei circuiti reali passa corrente elettrica soggetta a sbalzi di tensione e rumore di fondo.
+                        Confronta cosa succede quando proviamo a trasmettere dati usando <strong class="text-amber-400">10 livelli di luminosità (Decimale)</strong> rispetto a solo <strong class="text-emerald-400">2 stati: SPENTO/ACCESO (Binario)</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- MAIN SIMULATOR GRID -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- CONTROLS & TRASMITTER -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 flex flex-col justify-between space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-tower-cell text-sky-400"></i> Trasmettitore (Invia Valore)
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Imposta la modalità e il valore da inviare al ricevitore.</p>
+
+                        <!-- MODE TOGGLE -->
+                        <div class="mt-5 grid grid-cols-2 gap-3">
+                            <button id="btn-mode-dec" onclick="setSimMode('dec')" class="p-3 rounded-xl border text-left transition-all bg-amber-500/10 border-amber-500/40 text-amber-300">
+                                <div class="text-xs font-semibold text-amber-400">Modalità Decimale</div>
+                                <div class="text-sm font-bold mt-1">10 Livelli (0-9)</div>
+                            </button>
+                            <button id="btn-mode-bin" onclick="setSimMode('bin')" class="p-3 rounded-xl border text-left transition-all bg-slate-900/60 border-slate-700 text-slate-400 hover:border-slate-600">
+                                <div class="text-xs font-semibold text-slate-400">Modalità Binaria</div>
+                                <div class="text-sm font-bold mt-1">2 Stati (0 o 1)</div>
+                            </button>
+                        </div>
+
+                        <!-- VALUE SELECTOR -->
+                        <div class="mt-6 space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-300 font-medium">Valore Originario da Trasmettere:</span>
+                                <span id="tx-val-disp" class="font-bold text-amber-400 text-lg">5</span>
+                            </div>
+                            <input type="range" id="tx-val-slider" min="0" max="9" value="5" oninput="updateSim()" class="w-full accent-sky-500 bg-slate-900 rounded-lg h-2 cursor-pointer">
+                            <div id="tx-val-scale" class="flex justify-between text-[10px] text-slate-500 px-1 font-mono">
+                                <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+                            </div>
+                        </div>
+
+                        <!-- NOISE SLIDER -->
+                        <div class="mt-6 bg-slate-900/80 p-4 rounded-xl border border-slate-700/50 space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-rose-400 font-medium flex items-center gap-2">
+                                    <i class="fa-solid fa-bolt"></i> Rumore / Disturbo Elettrico:
+                                </span>
+                                <span id="noise-disp" class="font-bold text-rose-400">25%</span>
+                            </div>
+                            <input type="range" id="noise-slider" min="0" max="60" value="25" oninput="updateSim()" class="w-full accent-rose-500 bg-slate-800 rounded-lg h-2 cursor-pointer">
+                            <p class="text-[11px] text-slate-400">Aumenta il rumore per simulare sbalzi di tensione, cavi di scarsa qualità o interferenze elettromagnetiche.</p>
+                        </div>
+                    </div>
+
+                    <!-- LAMP VISUALIZER -->
+                    <div class="flex flex-col items-center justify-center bg-slate-950 p-6 rounded-xl border border-slate-800 relative">
+                        <span class="text-xs text-slate-500 absolute top-3 left-3 uppercase font-mono">Segnale Ottico / Tensione</span>
+                        <div id="sim-bulb" class="glow-bulb my-4 w-24 h-24 rounded-full flex items-center justify-center text-4xl text-slate-900 shadow-2xl" style="background-color: rgb(128,128,128);">
+                            <i class="fa-regular fa-lightbulb"></i>
+                        </div>
+                        <div id="sim-bulb-info" class="text-xs font-mono text-slate-400">
+                            Intensità nominale: <span id="sim-intensity-text" class="text-white font-bold">50%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECEIVER & COMPARISON -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 flex flex-col justify-between space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-microchip text-emerald-400"></i> Ricevitore (Decodifica il Segnale)
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Il sensore legge la luminosità disturbata e prova a ricostruire il dato originale.</p>
+
+                        <!-- RECEIVER DISPLAY -->
+                        <div class="mt-6 bg-slate-950 rounded-xl p-5 border border-slate-800 space-y-4">
+                            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                                <span class="text-xs text-slate-400">Intensità Misurata (con Disturbo):</span>
+                                <span id="rx-measured-text" class="font-mono text-sm font-bold text-sky-400">53.4%</span>
+                            </div>
+
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-semibold text-slate-200">Valore Decodificato dal Ricevitore:</span>
+                                <span id="rx-decoded-val" class="text-3xl font-bold font-mono text-amber-400">5</span>
+                            </div>
+
+                            <!-- ERROR STATUS BANNER -->
+                            <div id="rx-status-banner" class="p-3 rounded-lg text-xs font-semibold flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+                                <i class="fa-solid fa-circle-check text-base"></i>
+                                <span>Trasmissione Perfetta! Nessun errore rilevato.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EXPLANATION CARD -->
+                    <div id="sim-explanation-card" class="bg-slate-900/60 border border-slate-700/60 p-5 rounded-xl text-xs space-y-2">
+                        <h4 class="font-bold text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-info text-sky-400"></i> Cosa sta succedendo?
+                        </h4>
+                        <p id="sim-exp-text" class="text-slate-300 leading-relaxed">
+                            Nella modalità decimale ogni cifra differisce da quella adiacente di appena il 10% di tensione. Basta un piccolo disturbo (+- 5%) per far scambiare un 5 per un 6!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: GIOCO "LA SFIDA DELLA LAMPADINA" -->
+        <div id="panel-game" class="hidden space-y-6">
+            <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="text-xs uppercase tracking-wider font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">Sfida per gli Studenti</span>
+                    <h2 class="text-2xl font-bold text-white mt-2">La Sfida della Lampadina Disturbata</h2>
+                    <p class="text-slate-300 text-sm mt-1">La lampadina trasmetterà una sequenza di cifre. Riuscirai a decifrarle nonostante le interferenze?</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400">Punteggio Sfida</div>
+                        <div id="game-score" class="text-2xl font-bold text-emerald-400 font-mono">0 Punti</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GAME BOARD -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- LAMP BULB DISPLAY -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 flex flex-col items-center justify-center space-y-6 text-center">
+                    <div class="w-full flex justify-between items-center text-xs text-slate-400">
+                        <span id="game-round-label" class="font-semibold text-sky-400">ROUND 1: Decimale con Rumore</span>
+                        <span id="game-step-counter" class="font-mono">Cifra 1 di 4</span>
+                    </div>
+
+                    <!-- BULB -->
+                    <div id="game-bulb" class="glow-bulb w-32 h-32 rounded-full flex items-center justify-center text-5xl text-slate-900 shadow-2xl my-2" style="background-color: #334155;">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div id="game-bulb-status" class="text-sm font-bold text-white">In attesa di iniziare...</div>
+                        <div id="game-bulb-sub" class="text-xs text-slate-400">Premi il tasto per trasmettere la prossima cifra</div>
+                    </div>
+
+                    <!-- ACTION BUTTON -->
+                    <button id="btn-start-signal" onclick="playNextGameDigit()" class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> Invia Prossimo Segnale
+                    </button>
+                </div>
+
+                <!-- STUDENT INPUT AREA -->
+                <div class="lg:col-span-2 bg-slate-800/80 border border-slate-700 rounded-2xl p-6 flex flex-col justify-between space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square text-amber-400"></i> La tua Decodifica
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Guarda l'intensità della lampadina sopra e indovina quale cifra voleva inviare il trasmettitore!</p>
+
+                        <!-- INPUT DIGITS GRID -->
+                        <div class="mt-6">
+                            <div class="text-xs text-slate-400 mb-2">Sequenza Ricevuta (Inserisci i tuoi tentativi):</div>
+                            <div id="game-sequence-slots" class="flex gap-3">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- INPUT CHOICE BUTTONS -->
+                        <div id="game-choice-buttons" class="mt-8 space-y-2">
+                            <div class="text-xs text-slate-400 mb-1">Seleziona il valore per lo slot attivo:</div>
+                            <div id="game-btn-grid" class="grid grid-cols-5 gap-2">
+                                <!-- Generated by JS depending on mode -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FEEDBACK & RESULT AREA -->
+                    <div id="game-feedback-box" class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <div id="game-feedback-title" class="text-sm font-bold text-white">Pronto a Giocare?</div>
+                            <div id="game-feedback-desc" class="text-xs text-slate-400 mt-0.5">Avvia la trasmissione per analizzare la luminosità.</div>
+                        </div>
+                        <button id="btn-check-game" onclick="checkGameAnswers()" disabled class="px-5 py-2.5 bg-slate-700 text-slate-400 font-bold rounded-xl text-xs transition-all cursor-not-allowed">
+                            Verifica Sequenza
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let simMode = 'dec'; // 'dec' or 'bin'
+
+        // SIMULATOR LOGIC
+        function setSimMode(mode) {
+            simMode = mode;
+            const btnDec = document.getElementById('btn-mode-dec');
+            const btnBin = document.getElementById('btn-mode-bin');
+            const slider = document.getElementById('tx-val-slider');
+            const scale = document.getElementById('tx-val-scale');
+
+            if(mode === 'dec') {
+                btnDec.className = "p-3 rounded-xl border text-left transition-all bg-amber-500/10 border-amber-500/40 text-amber-300";
+                btnBin.className = "p-3 rounded-xl border text-left transition-all bg-slate-900/60 border-slate-700 text-slate-400 hover:border-slate-600";
+                slider.max = "9";
+                if(parseInt(slider.value) > 9) slider.value = "5";
+                scale.innerHTML = '<span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>';
+            } else {
+                btnBin.className = "p-3 rounded-xl border text-left transition-all bg-emerald-500/10 border-emerald-500/40 text-emerald-300";
+                btnDec.className = "p-3 rounded-xl border text-left transition-all bg-slate-900/60 border-slate-700 text-slate-400 hover:border-slate-600";
+                slider.max = "1";
+                if(parseInt(slider.value) > 1) slider.value = "1";
+                scale.innerHTML = '<span class="font-bold text-slate-300">0 (SPENTO - 0 Volts)</span><span class="font-bold text-emerald-400">1 (ACCESO - 5 Volts)</span>';
+            }
+            updateSim();
+        }
+
+        function updateSim() {
+            const txVal = parseInt(document.getElementById('tx-val-slider').value);
+            const noisePercent = parseInt(document.getElementById('noise-slider').value);
+
+            document.getElementById('tx-val-disp').innerText = txVal;
+            document.getElementById('noise-disp').innerText = noisePercent + '%';
+
+            // Calculate nominal brightness %
+            let nominalPct = 0;
+            if(simMode === 'dec') {
+                nominalPct = (txVal / 9) * 100;
+            } else {
+                nominalPct = txVal === 1 ? 100 : 0;
+            }
+
+            // Apply pseudo-random noise simulation
+            // Noise fluctuates between -noisePercent% and +noisePercent%
+            const randomNoise = (Math.random() * 2 - 1) * (noisePercent * 0.8);
+            let measuredPct = Math.min(100, Math.max(0, nominalPct + randomNoise));
+
+            // Update Bulb Visuals
+            const bulb = document.getElementById('sim-bulb');
+            const brightnessHex = Math.round((measuredPct / 100) * 255);
+            bulb.style.backgroundColor = `rgb(${brightnessHex}, ${brightnessHex}, ${Math.round(brightnessHex * 0.4)})`;
+            bulb.style.boxShadow = `0 0 ${measuredPct * 0.4}px rgba(234, 179, 8, ${measuredPct / 100})`;
+            document.getElementById('sim-intensity-text').innerText = nominalPct.toFixed(0) + '%';
+            document.getElementById('rx-measured-text').innerText = measuredPct.toFixed(1) + '%';
+
+            // Decode logic at receiver
+            let rxVal = 0;
+            let hasError = false;
+
+            if(simMode === 'dec') {
+                // Decimal: divides 0-100% into 10 bands of 10% each
+                rxVal = Math.min(9, Math.max(0, Math.round((measuredPct / 100) * 9)));
+                hasError = (rxVal !== txVal);
+            } else {
+                // Binary: threshold is 50%. Anything > 50% is 1, < 50% is 0
+                rxVal = measuredPct >= 50 ? 1 : 0;
+                hasError = (rxVal !== txVal);
+            }
+
+            document.getElementById('rx-decoded-val').innerText = rxVal;
+
+            // Status Banner and Explanation Update
+            const statusBanner = document.getElementById('rx-status-banner');
+            const expText = document.getElementById('sim-exp-text');
+
+            if(hasError) {
+                statusBanner.className = "p-3 rounded-lg text-xs font-semibold flex items-center gap-2 bg-rose-500/10 border border-rose-500/30 text-rose-300";
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>ERRORE DI TRASMISSIONE! Inviato ${txVal}, decodificato ${rxVal}.</span>`;
+            } else {
+                statusBanner.className = "p-3 rounded-lg text-xs font-semibold flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300";
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> <span>Trasmissione Corretta (${txVal} == ${rxVal})</span>`;
+            }
+
+            if(simMode === 'dec') {
+                expText.innerHTML = `Nella modalità <strong>Decimale</strong>, lo scarto tra due valori vicini (es. 5 e 6) è di appena il 10%. Quando il rumore di fondo supera il 5-10%, il ricevitore sbaglia e confonde le cifre.`;
+            } else {
+                expText.innerHTML = `Nella modalità <strong>Binaria</strong>, c'è un enorme margine di sicurezza! La soglia di decisione è al 50%. Anche con un rumore fortissimo del 40%, il sistema distingue sempre uno 0 (spento) da un 1 (acceso).`;
+            }
+        }
+
+        // TAB SWITCHING
+        function switchTab(tab) {
+            const panelSim = document.getElementById('panel-sim');
+            const panelGame = document.getElementById('panel-game');
+            const tabSim = document.getElementById('tab-sim');
+            const tabGame = document.getElementById('tab-game');
+
+            if(tab === 'sim') {
+                panelSim.classList.remove('hidden');
+                panelGame.classList.add('hidden');
+                tabSim.className = "px-4 py-2 rounded-lg font-medium transition-all bg-sky-600 text-white shadow-sm";
+                tabGame.className = "px-4 py-2 rounded-lg font-medium transition-all text-slate-400 hover:text-white";
+            } else {
+                panelGame.classList.remove('hidden');
+                panelSim.classList.add('hidden');
+                tabGame.className = "px-4 py-2 rounded-lg font-medium transition-all bg-sky-600 text-white shadow-sm";
+                tabSim.className = "px-4 py-2 rounded-lg font-medium transition-all text-slate-400 hover:text-white";
+                initGameRound(1);
+            }
+        }
+
+        // GAME STATE & LOGIC
+        let gameRound = 1; // 1 = Decimal with Noise, 2 = Binary with Noise
+        let secretSequence = [];
+        let userAnswers = [];
+        let currentStepIndex = 0;
+        let score = 0;
+
+        function initGameRound(round) {
+            gameRound = round;
+            currentStepIndex = 0;
+            userAnswers = ['', '', '', ''];
+
+            const roundLabel = document.getElementById('game-round-label');
+            const btnGrid = document.getElementById('game-btn-grid');
+
+            if(round === 1) {
+                roundLabel.innerText = "ROUND 1: Sistema Decimale (Rumore 20%)";
+                roundLabel.className = "font-semibold text-amber-400";
+                // Generate 4 secret decimal digits
+                secretSequence = Array.from({length: 4}, () => Math.floor(Math.random() * 10));
+
+                // Build 0-9 buttons
+                btnGrid.className = "grid grid-cols-5 gap-2";
+                btnGrid.innerHTML = '';
+                for(let i=0; i<=9; i++) {
+                    btnGrid.innerHTML += `<button onclick="setUserChoice(${i})" class="py-2 bg-slate-900 hover:bg-slate-700 text-white font-mono font-bold rounded-lg border border-slate-700 hover:border-amber-400 transition-all">${i}</button>`;
+                }
+            } else {
+                roundLabel.innerText = "ROUND 2: Sistema Binario (Stesso Rumore!)";
+                roundLabel.className = "font-semibold text-emerald-400";
+                // Generate 4 secret binary bits
+                secretSequence = Array.from({length: 4}, () => Math.floor(Math.random() * 2));
+
+                // Build 0 and 1 buttons
+                btnGrid.className = "grid grid-cols-2 gap-3";
+                btnGrid.innerHTML = `
+                    <button onclick="setUserChoice(0)" class="py-3 bg-slate-900 hover:bg-slate-700 text-slate-300 font-mono font-bold rounded-lg border border-slate-700 hover:border-emerald-400 transition-all text-sm">0 (SPENTO)</button>
+                    <button onclick="setUserChoice(1)" class="py-3 bg-slate-900 hover:bg-slate-700 text-emerald-400 font-mono font-bold rounded-lg border border-slate-700 hover:border-emerald-400 transition-all text-sm">1 (ACCESO)</button>
+                `;
+            }
+
+            renderSequenceSlots();
+            document.getElementById('game-bulb-status').innerText = "In attesa del segnale 1";
+            document.getElementById('game-step-counter').innerText = `Cifra 1 di 4`;
+            document.getElementById('game-feedback-title').innerText = "Guarda la lampadina";
+            document.getElementById('game-feedback-desc').innerText = "Fai clic su 'Invia Prossimo Segnale' per trasmettere la cifra.";
+            document.getElementById('btn-start-signal').disabled = false;
+            document.getElementById('btn-start-signal').className = "w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer";
+        }
+
+        function renderSequenceSlots() {
+            const container = document.getElementById('game-sequence-slots');
+            container.innerHTML = '';
+            for(let i=0; i<4; i++) {
+                const val = userAnswers[i];
+                const isActive = (i === currentStepIndex);
+                container.innerHTML += `
+                    <div class="flex-1 py-4 rounded-xl border-2 font-mono font-bold text-xl flex flex-col items-center justify-center transition-all ${isActive ? 'border-amber-400 bg-amber-500/10 text-amber-300' : 'border-slate-700 bg-slate-900 text-slate-400'}">
+                        <span class="text-[10px] text-slate-500 uppercase font-sans mb-1">Cifra ${i+1}</span>
+                        <span>${val !== '' ? val : '?'}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function playNextGameDigit() {
+            const targetVal = secretSequence[currentStepIndex];
+            const noise = (Math.random() * 2 - 1) * 18; // 18% noise
+
+            let nominalPct = (gameRound === 1) ? (targetVal / 9) * 100 : (targetVal === 1 ? 100 : 0);
+            let noisyPct = Math.min(100, Math.max(0, nominalPct + noise));
+
+            const bulb = document.getElementById('game-bulb');
+            const brightnessHex = Math.round((noisyPct / 100) * 255);
+
+            // Flash effect
+            bulb.style.backgroundColor = `rgb(${brightnessHex}, ${brightnessHex}, ${Math.round(brightnessHex * 0.4)})`;
+            bulb.style.boxShadow = `0 0 ${noisyPct * 0.5}px rgba(234, 179, 8, ${noisyPct / 100})`;
+
+            document.getElementById('game-bulb-status').innerText = `Segnale Cifra ${currentStepIndex + 1} inviato!`;
+            //document.getElementById('game-bulb-sub').innerText = `Luminosità registrata ~ ${noisyPct.toFixed(0)}%`;
+            document.getElementById('game-feedback-desc').innerText = `Scegli la cifra che ritieni corrisponda a questa luminosità.`;
+        }
+
+        function setUserChoice(val) {
+            userAnswers[currentStepIndex] = val;
+            renderSequenceSlots();
+
+            if(currentStepIndex < 3) {
+                currentStepIndex++;
+                document.getElementById('game-step-counter').innerText = `Cifra ${currentStepIndex + 1} di 4`;
+                renderSequenceSlots();
+            } else {
+                // Completed all 4 entries
+                document.getElementById('btn-check-game').disabled = false;
+                document.getElementById('btn-check-game').className = "px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-lg";
+                document.getElementById('game-feedback-title').innerText = "Sequenza completa!";
+                document.getElementById('game-feedback-desc').innerText = "Premi 'Verifica Sequenza' per scoprire se hai indovinato o se il rumore ti ha tratto in inganno.";
+            }
+        }
+
+        function checkGameAnswers() {
+            let correctCount = 0;
+            for(let i=0; i<4; i++) {
+                if(userAnswers[i] === secretSequence[i]) correctCount++;
+            }
+
+            const feedbackTitle = document.getElementById('game-feedback-title');
+            const feedbackDesc = document.getElementById('game-feedback-desc');
+
+            if(correctCount === 4) {
+                score += (gameRound === 1 ? 100 : 50);
+                document.getElementById('game-score').innerText = score + " Punti";
+                feedbackTitle.innerText = "🎉 Perfetto! 4/4 Corretti!";
+                if(gameRound === 1) {
+                    feedbackDesc.innerText = "Sei stato fortunato! Passiamo al Round 2 per provare il sistema binario.";
+                    setTimeout(() => initGameRound(2), 2500);
+                } else {
+                    feedbackDesc.innerText = "Visto com'è facile col Binario? 0 e 1 si riconoscono all'istante!";
+                }
+            } else {
+                feedbackTitle.innerText = `⚠️ Hai indovinato ${correctCount} cifre su 4.`;
+                feedbackDesc.innerText = `I valori reali erano: [${secretSequence.join(', ')}]. Il rumore di fondo ti ha fatto sbagliare!`;
+                if(gameRound === 1) {
+                    setTimeout(() => {
+                        alert("Proviamo ora la stessa trasmissione in modalità BINARIA. Vedrai quanto diventerà facile!");
+                        initGameRound(2);
+                    }, 2000);
+                }
+            }
+        }
+
+        // Initialize simulator on load
+        window.onload = function() {
+            updateSim();
+        };
+    </script>
+</body>
+</html>
