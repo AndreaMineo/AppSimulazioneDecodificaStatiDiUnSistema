@@ -36,8 +36,6 @@ Un minigioco a round pensato per lezioni interattive in classe:
 
 L'applicazione è **100% client-side** (file unico HTML/JS):
 - **Esecuzione Locale**: Basta fare doppio clic sul file HTML per aprirlo nel browser.
-- **Hosting Online**: Può essere ospitata gratuitamente su **GitHub Pages** o **Netlify Drop** per condividerla con la classe tramite link.
-
 ---
 
 ## 📜 Licenza
